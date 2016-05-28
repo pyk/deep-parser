@@ -1,0 +1,85 @@
+/* DeepParse is distributed under BSD license reproduced below. */ 
+/* It is a fast (due to its greedy nature) and efficient */
+/* (near state-of-the-art performance) constituency parser, */
+/* based on neural networks. This software is written in C and */
+/* requires about 320MB of RAM for its execution. */
+
+/* Copyright (c) 2014 Idiap Research Institute, http://www.idiap.ch/ */
+/* Written by Joël Legrand <joel.legrand@idiap.ch> */
+
+/* Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met: */
+
+/* 1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer. */
+
+/* 2. Redistributions in binary form must reproduce the above
+   copyright notice, this list of conditions and the following
+   disclaimer in the documentation and/or other materials provided
+   with the distribution. */
+
+/* 3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission. */
+
+/* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+   FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+   COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+   INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+   STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+   OF THE POSSIBILITY OF SUCH DAMAGE. */
+   
+First of all, download the POS tagger senna (non commercial licence) at this address (http://ml.nec-labs.com/senna/) and unpack it in the folder "senna".
+
+=================== Compilation ===========================
+
+	gcc -Wall -O3 -o parse *.c senna/SENNA_Hash.c senna/SENNA_POS.c senna/SENNA_Tokenizer.c senna/SENNA_utils.c senna/SENNA_nn.c -lblas
+
+==============================================================================================
+=======> We strongly recommend to compile with BLAS (3/6 time faster using ATlAS/MKL). <======
+==============================================================================================
+
+To use Intel MKL library, which provides a very efficient implementation, add the definition USE_MKL_BLAS, as well as correct MKL libraries, include path and proper option (see MKL documentation). 
+       
+       gcc -Wall -O3 -o parse -DUSE_MKL_BLAS [..] *.c senna/SENNA_Hash.c senna/SENNA_POS.c senna/SENNA_Tokenizer.c senna/SENNA_utils.c senna/SENNA_nn.c
+
+To use the ATLAS BLAS implementation, add the definition USE_MKL_ATLAS. 
+
+       gcc -Wall -O3 -o parse -DUSE_ATLAS_BLAS -lblas *.c senna/SENNA_Hash.c senna/SENNA_POS.c senna/SENNA_Tokenizer.c senna/SENNA_utils.c senna/SENNA_nn.c
+
+To use Apple's BLAS implementation with mac, add the definition -DUSE_APPLE_BLAS, as well as the "-framework Accelerate" option.
+
+       clang -Wall -O3 -o parse -DUSE_APPLE_BLAS -framework Accelerate *.c senna/SENNA_Hash.c senna/SENNA_POS.c senna/SENNA_Tokenizer.c senna/SENNA_utils.c senna/SENNA_nn.c
+
+
+===================== Execution  ============================
+
+* Using Senna POS tags (inferred on the fly):
+  	./parse < input/words-test.txt
+* Using user's POS tags
+       ./parse -usrpos input/tags-test.txt < input/words-test.txt
+
+* Interactive mode
+        ./parse
+
+This parser expects token as input. 
+For instance, if one wants to parse the sentence :
+
+    No, it wasn't Black Monday.
+
+, the input should be :
+
+    No it was n't Black Monday .
+
+
+======================== Help ================================
+
+    ./parse -h
+
